@@ -1604,3 +1604,230 @@ wget -q --show-progress --https-only --timestamping \
   chmod +x  kubectl kube-proxy kubelet  
   sudo mv  kubectl kube-proxy kubelet /usr/local/bin/
 }
+
+# Configure the worker nodes components
+
+# Configuring the network
+
+# Get the POD_CIDR that will be used as part of network configuration
+
+POD_CIDR=$(curl -s http://169.254.169.254/latest/user-data/ \
+  | tr "|" "\n" | grep "^pod-cidr" | cut -d"=" -f2)
+echo "${POD_CIDR}"
+
+```
+
+**Pod Network**
+
+You must decide on the Pod CIDR per worker node. Each worker node will run multiple pods, and each pod will have its own IP address. IP address of a particular Pod on worker node 1 should be able to communicate with the IP address of another particular Pod on worker node 2. For this to become possible, there must be a bridge network with virtual network interfaces that connects them all together.
+
+
+**Configure the bridge and loopback networks**
+
+**Bridge:**
+
+```bash
+cat > 172-20-bridge.conf <<EOF
+{
+    "cniVersion": "0.3.1",
+    "name": "bridge",
+    "type": "bridge",
+    "bridge": "cnio0",
+    "isGateway": true,
+    "ipMasq": true,
+    "ipam": {
+        "type": "host-local",
+        "ranges": [
+          [{"subnet": "${POD_CIDR}"}]
+        ],
+        "routes": [{"dst": "0.0.0.0/0"}]
+    }
+}
+EOF
+```
+
+**Loopback:**
+
+```bash
+
+cat > 99-loopback.conf <<EOF
+{
+    "cniVersion": "0.3.1",
+    "type": "loopback"
+}
+EOF
+```
+
+- Move the files to the network configuration directory:
+
+```bash
+sudo mv 172-20-bridge.conf 99-loopback.conf /etc/cni/net.d/
+
+# Store the worker’s name in a variable:
+
+NAME=k8s-cluster-from-ground-up
+WORKER_NAME=${NAME}-$(curl -s http://169.254.169.254/latest/user-data/ \
+  | tr "|" "\n" | grep "^name" | cut -d"=" -f2)
+echo "${WORKER_NAME}"
+
+# Move the certificates and kubeconfig file to their respective configuration directories:
+sudo mv ${WORKER_NAME}-key.pem ${WORKER_NAME}.pem /var/lib/kubelet/
+sudo mv ${WORKER_NAME}.kubeconfig /var/lib/kubelet/kubeconfig
+sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
+sudo mv ca.pem /var/lib/kubernetes/
+
+#Create the kubelet-config.yaml file
+#Ensure the needed variables exist:
+
+cat <<EOF | sudo tee /var/lib/kubelet/kubelet-config.yaml
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+authentication:
+  anonymous:
+    enabled: false
+  webhook:
+    enabled: true
+  x509:
+    clientCAFile: "/var/lib/kubernetes/ca.pem"
+authorization:
+  mode: Webhook
+clusterDomain: "cluster.local"
+clusterDNS:
+  - "10.32.0.10"
+resolvConf: "/etc/resolv.conf"
+runtimeRequestTimeout: "15m"
+tlsCertFile: "/var/lib/kubelet/${WORKER_NAME}.pem"
+tlsPrivateKeyFile: "/var/lib/kubelet/${WORKER_NAME}-key.pem"
+EOF
+
+
+# Create the kubelet.service systemd unit file:
+cat <<EOF | sudo tee /etc/systemd/system/kubelet.service
+[Unit]
+Description=Kubernetes Kubelet
+Documentation=https://github.com/kubernetes/kubernetes
+After=containerd.service
+Requires=containerd.service
+[Service]
+ExecStart=/usr/local/bin/kubelet \\
+  --config=/var/lib/kubelet/kubelet-config.yaml \\
+  --cluster-domain=cluster.local \\
+  --container-runtime=remote \\
+  --container-runtime-endpoint=unix:///var/run/containerd/containerd.sock \\
+  --image-pull-progress-deadline=2m \\
+  --kubeconfig=/var/lib/kubelet/kubeconfig \\
+  --network-plugin=cni \\
+  --register-node=true \\
+  --v=2
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#- Create the kube-proxy.yaml file
+cat <<EOF | sudo tee /var/lib/kube-proxy/kube-proxy-config.yaml
+kind: KubeProxyConfiguration
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+clientConnection:
+  kubeconfig: "/var/lib/kube-proxy/kubeconfig"
+mode: "iptables"
+clusterCIDR: "172.31.0.0/16"
+EOF
+
+Configure the Kube Proxy systemd service
+cat <<EOF | sudo tee /etc/systemd/system/kube-proxy.service
+[Unit]
+Description=Kubernetes Kube Proxy
+Documentation=https://github.com/kubernetes/kubernetes
+[Service]
+ExecStart=/usr/local/bin/kube-proxy \\
+  --config=/var/lib/kube-proxy/kube-proxy-config.yaml
+Restart=on-failure
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+### Project Screenshots
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/01.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/02.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/03.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/04.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/05.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/06.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/07.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/08.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/09.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/10.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/11.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/12.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/13.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/14.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/15.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/16.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/17.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/18.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/19.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/20.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/21.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/22.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/23.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/24.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/25.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/26.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/27.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/28.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/29.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/30.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/31.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/32.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/33.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/34.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/35.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/36.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/37.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/38.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/39.png)
+
+![alt text](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/main/screenshots/40.png)
