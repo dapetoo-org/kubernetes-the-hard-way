@@ -148,3 +148,47 @@ aws ec2 create-tags \
 aws ec2 associate-dhcp-options \
   --dhcp-options-id ${DHCP_OPTION_SET_ID} \
   --vpc-id ${VPC_ID}
+
+# Create subnet resources
+SUBNET_ID=$(aws ec2 create-subnet \
+  --vpc-id ${VPC_ID} \
+  --cidr-block 172.31.0.0/24 \
+  --output text --query 'Subnet.SubnetId')
+
+# Add a name tag to the subnet:
+aws ec2 create-tags \
+  --resources ${SUBNET_ID} \
+  --tags Key=Name,Value=${NAME}
+
+# Create an Internet gateway and store the ID as a variable:
+INTERNET_GATEWAY_ID=$(aws ec2 create-internet-gateway \
+  --output text --query 'InternetGateway.InternetGatewayId')
+aws ec2 create-tags \
+  --resources ${INTERNET_GATEWAY_ID} \
+  --tags Key=Name,Value=${NAME}
+
+# Attach the Internet gateway to the VPC:
+aws ec2 attach-internet-gateway \
+  --internet-gateway-id ${INTERNET_GATEWAY_ID} \
+  --vpc-id ${VPC_ID}
+
+# Create a route table and store the ID as a variable:
+ROUTE_TABLE_ID=$(aws ec2 create-route-table \
+  --vpc-id ${VPC_ID} \
+  --output text --query 'RouteTable.RouteTableId')
+
+# Add a name tag to the route table:
+aws ec2 create-tags \
+  --resources ${ROUTE_TABLE_ID} \
+  --tags Key=Name,Value=${NAME}
+
+# Associate the route table with the subnet:
+aws ec2 associate-route-table \
+  --route-table-id ${ROUTE_TABLE_ID} \
+  --subnet-id ${SUBNET_ID}
+
+# Create a route in the route table that points all traffic to the Internet gateway:
+aws ec2 create-route \
+  --route-table-id ${ROUTE_TABLE_ID} \
+  --destination-cidr-block 0.0.0.0/0 \
+  --gateway-id ${INTERNET_GATEWAY_ID}
