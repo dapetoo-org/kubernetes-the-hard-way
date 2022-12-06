@@ -90,9 +90,9 @@ kubectl version --client
 ### AWS CLOUD RESOURCES FOR KUBERNETES CLUSTER
 
 **Step 1 – Configure Network Infrastructure**
-- Virtual Private Cloud – VPC
 
 ```bash
+# - Virtual Private Cloud – VPC
 # Create a VPC and store the ID as a variable:
 VPC_ID=$(aws ec2 create-vpc \
 --cidr-block 172.31.0.0/16 \
@@ -267,5 +267,75 @@ LISTENER_ARN=$(aws elbv2 create-listener \
   --output text --query 'Listeners[].ListenerArn')
 
 # Get the Kubernetes Public address
+KUBERNETES_PUBLIC_ADDRESS=$(aws elbv2 describe-load-balancers \
+--load-balancer-arns ${LOAD_BALANCER_ARN} \
+--output text --query 'LoadBalancers[].DNSName')
+```
 
+**Step2: Compute Resources**
 
+In this step, we will create the compute resources for the Kubernetes cluster. We will create the master node and the worker nodes. We will use the AWS EC2 instances to create the compute resources.
+
+```bash
+
+#Get an image to create EC2 instances
+IMAGE_ID=$(aws ec2 describe-images --owners 099720109477 \
+  --filters \
+  'Name=root-device-type,Values=ebs' \
+  'Name=architecture,Values=x86_64' \
+  'Name=name,Values=ubuntu/images/hvm-ssd/ubuntu-xenial-16.04-amd64-server-*' \
+  | jq -r '.Images|sort_by(.Name)[-1]|.ImageId')
+
+# Create SSH Key-Pair
+mkdir -p ssh
+
+aws ec2 create-key-pair \
+  --key-name ${NAME} \
+  --output text --query 'KeyMaterial' \
+  > ssh/${NAME}.id_rsa
+chmod 600 ssh/${NAME}.id_rsa
+
+# EC2 Instances for Controle Plane (Master Nodes)
+# Create 3 Master nodes
+for i in 0 1 2; do
+  instance_id=$(aws ec2 run-instances \
+    --associate-public-ip-address \
+    --image-id ami-0283a57753b18025b \
+    --count 1 \
+    --key-name ${NAME} \
+    --security-group-ids ${SECURITY_GROUP_ID} \
+    --instance-type t2.micro \
+    --private-ip-address 172.31.0.1${i} \
+    --user-data "name=master-${i}" \
+    --subnet-id ${SUBNET_ID} \
+    --output text --query 'Instances[].InstanceId')
+  aws ec2 modify-instance-attribute \
+    --instance-id ${instance_id} \
+    --no-source-dest-check
+  aws ec2 create-tags \
+    --resources ${instance_id} \
+    --tags "Key=Name,Value=${NAME}-master-${i}"
+done
+
+# EC2 Instances for Worker Nodes
+# Create 3 worker nodes:
+for i in 0 1 2; do
+  instance_id=$(aws ec2 run-instances \
+    --associate-public-ip-address \
+    --image-id ami-0283a57753b18025b \
+    --count 1 \
+    --key-name ${NAME} \
+    --security-group-ids ${SECURITY_GROUP_ID} \
+    --instance-type t2.micro \
+    --private-ip-address 172.31.0.2${i} \
+    --user-data "name=worker-${i}|pod-cidr=172.20.${i}.0/24" \
+    --subnet-id ${SUBNET_ID} \
+    --output text --query 'Instances[].InstanceId')
+  aws ec2 modify-instance-attribute \
+    --instance-id ${instance_id} \
+    --no-source-dest-check
+  aws ec2 create-tags \
+    --resources ${instance_id} \
+    --tags "Key=Name,Value=${NAME}-worker-${i}"
+done
+```
