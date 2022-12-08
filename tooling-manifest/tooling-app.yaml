@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: tooling-app
+  name: tooling-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tooling-app
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: tooling-app
+    spec:
+      containers:
+      - image: dapetoo/tooling:1
+        name: tooling
+        ports:
+        - containerPort: 8085
+        resources: {}
+status: {}
