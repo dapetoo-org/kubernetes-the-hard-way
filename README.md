@@ -194,11 +194,22 @@ ConfigMaps are used to store non-confidential data in key-value pairs. ConfigMap
 A ConfigMap is an API object used to store non-confidential data in key-value pairs. Pods can consume ConfigMaps as environment variables, command-line arguments, or as configuration files in a volume. ConfigMaps can be created from literal values, files, or directories. ConfigMaps can be mounted as volumes. The data stored in a ConfigMap object can be referenced in a volume of type configMap and then consumed by containerized applications running in a pod.
 
 
+### Project Screenshots 
 
-```
-
-```
-Challenges 
-- eksctl utils associate-iam-oidc-provider --region=us-east-2 --cluster=cluster --approve
-- eksctl create iamserviceaccount   --name ebs-csi-controller-sa   --namespace kube-system   --cluster cluster   --attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy   --approve   --role-only   --role-name AmazonEKS_EBS_CSI_DriverRole
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/01.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/02.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/03.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/04.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/05.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/06.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/07.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/08.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/09.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/10.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/11.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/12.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/13.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/14.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/15.png)
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/16.png)
 
