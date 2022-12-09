@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment-with-volume
+  labels:
+    tier: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-volume
+          mountPath: /usr/share/nginx/
+      volumes:
+      - name: nginx-volume
+        awsElasticBlockStore:
+          volumeID: "vol-070dc163b3308e805"
+          fsType: ext4
+
+
+
