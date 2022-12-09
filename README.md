@@ -272,18 +272,33 @@ spec:
 ### Project Screenshots 
 
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/01.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/02.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/03.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/04.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/05.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/06.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/07.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/08.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/09.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/10.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/11.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/12.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/13.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/14.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/15.png)
+
 ![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/data-persistence/screenshots/16.png)
