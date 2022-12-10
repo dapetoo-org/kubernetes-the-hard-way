@@ -8,9 +8,6 @@ module "eks_cluster" {
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   cluster_addons = {
-    coredns = {
-      most_recent = true
-    }
     kube-proxy = {
       most_recent = true
     }
