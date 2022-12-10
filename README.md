@@ -105,3 +105,50 @@ module "eks_cluster" {
   }
 }
 ```
+
+Initialize terraform with the modules and create the EKS cluster.
+
+```bash
+terraform init
+terraform plan
+terraform apply
+``` 
+
+```
+#Update Kubeconfig
+aws eks --region us-east-2 update-kubeconfig --name tooling-app-eks
+
+## DEPLOY APPLICATIONS WITH HELM
+
+A Helm chart is a definition of the resources that are required to run an application in Kubernetes. Instead of having to think about all of the various deployments/services/volumes/configmaps/ etc that make up your application, you can use a command like
+
+```
+helm install stable/mysql
+```
+
+and Helm will make sure all the required resources are installed. In addition you will be able to tweak helm configuration by setting a single variable to a particular value and more or less resources will be deployed. For example, enabling slave for MySQL so that it can have read only replicas.
+
+```
+#Install HELM
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+
+helm version
+
+#Deploy Jenkins
+#Add repository
+helm repo add jenkinsci https://charts.jenkins.io
+helm repo update
+
+#Install Chart
+helm install my-jenkins jenkinsci/jenkins --version 4.2.17
+helm ls
+kubectl exec --namespace default -it svc/my-jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo
+
+kubectl --namespace default port-forward svc/my-jenkins 8080:8080
+
+# Deploy Artifactory
+helm repo add jfrog https://charts.jfrog.io
+helm repo update
+helm install my-artifactory jfrog/artifactory --version 107.47.11
