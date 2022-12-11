@@ -152,3 +152,68 @@ kubectl --namespace default port-forward svc/my-jenkins 8080:8080
 helm repo add jfrog https://charts.jfrog.io
 helm repo update
 helm install my-artifactory jfrog/artifactory --version 107.47.11
+
+# Deploy Prometheus
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install my-release bitnami/kube-prometheus
+
+
+Watch the Prometheus Operator Deployment status using the command:
+
+    kubectl get deploy -w --namespace default -l app.kubernetes.io/name=kube-prometheus-operator,app.kubernetes.io/instance=my-release
+
+Watch the Prometheus StatefulSet status using the command:
+
+    kubectl get sts -w --namespace default -l app.kubernetes.io/name=kube-prometheus-prometheus,app.kubernetes.io/instance=my-release
+
+Prometheus can be accessed via port "9090" on the following DNS name from within your cluster:
+
+    my-release-kube-prometheus-prometheus.default.svc.cluster.local
+
+To access Prometheus from outside the cluster execute the following commands:
+
+    echo "Prometheus URL: http://127.0.0.1:9090/"
+    kubectl port-forward --namespace default svc/my-release-kube-prometheus-prometheus 9090:9090
+
+Watch the Alertmanager StatefulSet status using the command:
+
+    kubectl get sts -w --namespace default -l app.kubernetes.io/name=kube-prometheus-alertmanager,app.kubernetes.io/instance=my-release
+
+Alertmanager can be accessed via port "9093" on the following DNS name from within your cluster:
+
+    my-release-kube-prometheus-alertmanager.default.svc.cluster.local
+
+To access Alertmanager from outside the cluster execute the following commands:
+
+    echo "Alertmanager URL: http://127.0.0.1:9093/"
+    kubectl port-forward --namespace default svc/my-release-kube-prometheus-alertmanager 9093:9093
+
+# Deploy Grafana
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+helm install my-release-grafana grafana/grafana
+
+1. Get your 'admin' user password by running:
+
+   kubectl get secret --namespace default my-release-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+2. The Grafana server can be accessed via port 80 on the following DNS name from within your cluster:
+
+   my-release-grafana.default.svc.cluster.local
+
+   Get the Grafana URL to visit by running these commands in the same shell:
+     export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=my-release-grafana" -o jsonpath="{.items[0].metadata.name}")
+     kubectl --namespace default port-forward $POD_NAME 3000
+
+3. Login with the password from step 1 and the username: admin
+
+
+
+# Deploy ECK using Helm
+helm repo add elastic https://helm.elastic.co
+helm repo update
+
+# Deploy Hashicorp Vault
+helm repo add hashicorp https://helm.releases.hashicorp.com
+helm repo update
+helm install vault hashicorp/vault
