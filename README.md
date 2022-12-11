@@ -98,4 +98,8 @@ kubectl apply -f tooling-service.yaml
 
 ![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/07.png)
 
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/Screenshot%20from%202022-12-11%2019-55-48.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/Screenshot%20from%202022-12-11%2019-55-48.png)
+
 
