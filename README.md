@@ -82,6 +82,20 @@ kubectl apply -f tooling-service.yaml
 
 ```
 
+## Project Screenshots
 
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/01.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/02.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/03.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/04.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/05.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/06.png)
+
+![Screenshot](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/tooling-kubernetes/screenshots/07.png)
 
 
