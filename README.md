@@ -67,23 +67,18 @@ cd usr/share/nginx/html/
 kubectl expose deployment nginx --port=80 --type=LoadBalancer
 
 
-
-
 ``` 
 
 **Tooling App with Kubernetes**
 
 ```
-kubectl create deployment tooling-app --image=mshallom/tooling --replicas=2 --dry-run=client -o yaml > tooling-app.yaml
+kubectl create deployment tooling-app --image=dapetoo/tooling --replicas=2 --dry-run=client -o yaml > tooling-app.yaml
 
 kubectl apply -f tooling-app.yaml
 
 kubectl expose deployment tooling-app --type=LoadBalancer --port=8081 --dry-run=client -o yaml > tooling-service.yaml
 
 kubectl apply -f tooling-service.yaml 
-
-
-
 
 ```
 
