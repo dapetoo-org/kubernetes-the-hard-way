@@ -153,6 +153,22 @@ helm repo add jfrog https://charts.jfrog.io
 helm repo update
 helm install my-artifactory jfrog/artifactory --version 107.47.11
 
+1. Get the Artifactory URL by running these commands:
+   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+         You can watch the status of the service by running 'kubectl get svc --namespace default -w jfrog-platform-artifactory-nginx'
+   export SERVICE_IP=$(kubectl get svc --namespace default jfrog-platform-artifactory-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   echo http://$SERVICE_IP/
+
+2. Open Artifactory in your browser
+   Default credential for Artifactory:
+   user: admin
+   password: password
+
+Open Artifactory URL in your browser.
+To extract the database password, run the following
+export DB_PASSWORD=$(kubectl get --namespace default $(kubectl get secret --namespace default -o name | grep postgresql) -o jsonpath="{.data.postgresql-password}" | base64 --decode)
+echo ${DB_PASSWORD}
+
 # Deploy Prometheus
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install my-release bitnami/kube-prometheus
@@ -207,11 +223,14 @@ helm install my-release-grafana grafana/grafana
 
 3. Login with the password from step 1 and the username: admin
 
-
+helm delete my-release
 
 # Deploy ECK using Helm
 helm repo add elastic https://helm.elastic.co
 helm repo update
+helm install kibana elastic/kibana
+
+
 
 # Deploy Hashicorp Vault
 helm repo add hashicorp https://helm.releases.hashicorp.com
