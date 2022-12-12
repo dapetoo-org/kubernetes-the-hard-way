@@ -112,13 +112,14 @@ Initialize terraform with the modules and create the EKS cluster.
 terraform init
 terraform plan
 terraform apply
-``` 
-
 ```
+
+```bash
 #Update Kubeconfig
 aws eks --region us-east-2 update-kubeconfig --name tooling-app-eks
+```
 
-## DEPLOY APPLICATIONS WITH HELM
+### DEPLOY APPLICATIONS WITH HELM
 
 A Helm chart is a definition of the resources that are required to run an application in Kubernetes. Instead of having to think about all of the various deployments/services/volumes/configmaps/ etc that make up your application, you can use a command like
 
@@ -128,111 +129,147 @@ helm install stable/mysql
 
 and Helm will make sure all the required resources are installed. In addition you will be able to tweak helm configuration by setting a single variable to a particular value and more or less resources will be deployed. For example, enabling slave for MySQL so that it can have read only replicas.
 
-```
-#Install HELM
+```bash
+# Install HELM
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+
 chmod 700 get_helm.sh
+
 ./get_helm.sh
 
 helm version
+```
 
-#Deploy Jenkins
-#Add repository
+### Deploying different apps wtih Helm
+
+**Deploy Jenkins**
+
+```bash
+# Deploy Jenkins
+# Add repository
 helm repo add jenkinsci https://charts.jenkins.io
 helm repo update
 
 #Install Chart
 helm install my-jenkins jenkinsci/jenkins --version 4.2.17
 helm ls
+
+# Working with Jenkins pods
 kubectl exec --namespace default -it svc/my-jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password && echo
 
 kubectl --namespace default port-forward svc/my-jenkins 8080:8080
+```
 
+**Deploy Artifactory**
+
+```bash
 # Deploy Artifactory
 helm repo add jfrog https://charts.jfrog.io
 helm repo update
 helm install my-artifactory jfrog/artifactory --version 107.47.11
 
-1. Get the Artifactory URL by running these commands:
-   NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-         You can watch the status of the service by running 'kubectl get svc --namespace default -w jfrog-platform-artifactory-nginx'
-   export SERVICE_IP=$(kubectl get svc --namespace default jfrog-platform-artifactory-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-   echo http://$SERVICE_IP/
+# Get the Artifactory URL by running these commands:
+# NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+# You can watch the status of the service by running 
 
-2. Open Artifactory in your browser
-   Default credential for Artifactory:
-   user: admin
-   password: password
+kubectl get svc --namespace default -w jfrog-platform-artifactory-nginx
+   
+export SERVICE_IP=$(kubectl get svc --namespace default jfrog-platform-artifactory-nginx -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+   
+echo http://$SERVICE_IP/
 
-Open Artifactory URL in your browser.
-To extract the database password, run the following
+# Open Artifactory in your browser
+# Default credential for Artifactory:
+# user: admin
+#  password: password
+
+# Open Artifactory URL in your browser.
+# To extract the database password, run the following
 export DB_PASSWORD=$(kubectl get --namespace default $(kubectl get secret --namespace default -o name | grep postgresql) -o jsonpath="{.data.postgresql-password}" | base64 --decode)
-echo ${DB_PASSWORD}
 
+echo ${DB_PASSWORD}
+```
+
+**Deploy Prometheus**
+
+```bash
 # Deploy Prometheus
 helm repo add bitnami https://charts.bitnami.com/bitnami
 helm install my-release bitnami/kube-prometheus
 
 
-Watch the Prometheus Operator Deployment status using the command:
+# Watch the Prometheus Operator Deployment status using the command:
 
-    kubectl get deploy -w --namespace default -l app.kubernetes.io/name=kube-prometheus-operator,app.kubernetes.io/instance=my-release
+kubectl get deploy -w --namespace default -l app.kubernetes.io/name=kube-prometheus-operator,app.kubernetes.io/instance=my-release
 
-Watch the Prometheus StatefulSet status using the command:
+# Watch the Prometheus StatefulSet status using the command:
 
-    kubectl get sts -w --namespace default -l app.kubernetes.io/name=kube-prometheus-prometheus,app.kubernetes.io/instance=my-release
+kubectl get sts -w --namespace default -l app.kubernetes.io/name=kube-prometheus-prometheus,app.kubernetes.io/instance=my-release
 
-Prometheus can be accessed via port "9090" on the following DNS name from within your cluster:
+#Prometheus can be accessed via port "9090" on the following DNS name from within your cluster:
 
-    my-release-kube-prometheus-prometheus.default.svc.cluster.local
+  my-release-kube-prometheus-prometheus.default.svc.cluster.local
 
-To access Prometheus from outside the cluster execute the following commands:
+# To access Prometheus from outside the cluster execute the following commands:
 
-    echo "Prometheus URL: http://127.0.0.1:9090/"
-    kubectl port-forward --namespace default svc/my-release-kube-prometheus-prometheus 9090:9090
+echo "Prometheus URL: http://127.0.0.1:9090/"
 
-Watch the Alertmanager StatefulSet status using the command:
+kubectl port-forward --namespace default svc/my-release-kube-prometheus-prometheus 9090:9090
 
-    kubectl get sts -w --namespace default -l app.kubernetes.io/name=kube-prometheus-alertmanager,app.kubernetes.io/instance=my-release
+#Watch the Alertmanager StatefulSet status using the command:
 
-Alertmanager can be accessed via port "9093" on the following DNS name from within your cluster:
+kubectl get sts -w --namespace default -l app.kubernetes.io/name=kube-prometheus-alertmanager,app.kubernetes.io/instance=my-release
 
-    my-release-kube-prometheus-alertmanager.default.svc.cluster.local
+# Alertmanager can be accessed via port "9093" on the following DNS name from within your cluster:
 
-To access Alertmanager from outside the cluster execute the following commands:
+my-release-kube-prometheus-alertmanager.default.svc.cluster.local
 
-    echo "Alertmanager URL: http://127.0.0.1:9093/"
-    kubectl port-forward --namespace default svc/my-release-kube-prometheus-alertmanager 9093:9093
+# To access Alertmanager from outside the cluster execute the following commands:
 
+echo "Alertmanager URL: http://127.0.0.1:9093/"
+kubectl port-forward --namespace default svc/my-release-kube-prometheus-alertmanager 9093:9093
+```
+
+**Deploy Grafana**
+
+```bash
 # Deploy Grafana
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 helm install my-release-grafana grafana/grafana
 
-1. Get your 'admin' user password by running:
+#1. Get your 'admin' user password by running:
 
-   kubectl get secret --namespace default my-release-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+kubectl get secret --namespace default my-release-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 
-2. The Grafana server can be accessed via port 80 on the following DNS name from within your cluster:
+# 2. The Grafana server can be accessed via port 80 on the following DNS name from within your cluster:
 
    my-release-grafana.default.svc.cluster.local
 
-   Get the Grafana URL to visit by running these commands in the same shell:
-     export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=my-release-grafana" -o jsonpath="{.items[0].metadata.name}")
-     kubectl --namespace default port-forward $POD_NAME 3000
+#Get the Grafana URL to visit by running these commands in the same shell:
+export POD_NAME=$(kubectl get pods --namespace default -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=my-release-grafana" -o jsonpath="{.items[0].metadata.name}")
 
-3. Login with the password from step 1 and the username: admin
+kubectl --namespace default port-forward $POD_NAME 3000
 
-helm delete my-release
+#3. Login with the password from step 1 and the username: admin
+```
 
+**Deploy ELK**
+
+```bash
 # Deploy ECK using Helm
 helm repo add elastic https://helm.elastic.co
 helm repo update
 helm install kibana elastic/kibana
+```
 
+**Deploy Hashicorp Vault**
 
-
+```bash
 # Deploy Hashicorp Vault
 helm repo add hashicorp https://helm.releases.hashicorp.com
 helm repo update
 helm install vault hashicorp/vault
+```
+
+### Project Screenshots
