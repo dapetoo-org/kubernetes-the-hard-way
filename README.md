@@ -273,3 +273,24 @@ helm install vault hashicorp/vault
 ```
 
 ### Project Screenshots
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/01.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/02.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/03.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/04.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/05.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/06.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/07.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/08.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/09.png)
+
+![Screenshots](https://github.com/scholarship-task/kubernetes-the-hard-way/blob/eks-jenkins-terraform/screenshots/10.png)
+
