@@ -129,4 +129,64 @@ spec:
  nodeName: node02
  ```
 
+ Selector and Labels
+
+ ```
+ kubectl get pods --selector env=dev
+
+ kubectl get all --selector env=prod
+
+# Run the command to get exact number of objects
+ kubectl get all --selector env=prod --no-headers | wc -l
+
+ # Multiple selectors
+ kubectl get pods --selector env=prod,bu=finance,tier=frontend
+
+ ```
+
+ Taints and Tolerations
+
+ ```
+ kubectl describe nodes node01
+
+ # Create a taint on node01 with key of spray, value of mortein and effect of NoSchedule
+
+ kubectl taint node node01 spray=mortein:NoSchedule
+
+```
+
+**taints-tolerations.yaml**
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: bee
+spec:
+  containers:
+  - image: nginx
+    name: bee
+  tolerations:
+  - key: spray
+    value: mortein
+    effect: NoSchedule
+    operator: Equal
+```
+
+# Untaint control plane node 
+
+kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule- 
  
+kubectl taint nodes controlplane node-role.kubernetes.io/control-plane:NoSchedule
+
+
+# **-** This flag will remove the taint from the node
+
+
+Node Affinity
+
+```
+kubectl label nodes node01 color=blue
+
+kubectl describe node node01 | grep -i taints
+
