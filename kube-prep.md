@@ -189,4 +189,125 @@ Node Affinity
 kubectl label nodes node01 color=blue
 
 kubectl describe node node01 | grep -i taints
+```
 
+
+
+**node-affinity.yaml**
+Set Node Affinity to the deployment to place the pods on node01 only.
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blue
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      run: nginx
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: nginx
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: color
+                operator: In
+                values:
+                - blue
+```
+
+kubectl get pods -o wide
+
+Deploy a DaemonSet for FluentD Logging. Use the given specifications:
+Name: elasticsearch
+Namespace: kube-system
+Image: k8s.gcr.io/fluse the given specifications.
+Name: elasticsearch
+Namespace: kube-system
+Image: k8entd-elasticsearch:1.20
+
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: red
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: nginx
+  template:
+    metadata:
+      labels:
+        run: nginx
+    spec:
+      containers:
+      - image: nginx
+        imagePullPolicy: Always
+        name: nginx
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node-role.kubernetes.io/control-plane
+                operator: Exists
+
+# Create a new deployment named red with the nginx image and 2 replicas, and ensure it gets placed on the # controlplane node only.
+
+Use the label key - node-role.kubernetes.io/control-plane - which is already set on the controlplane node.
+
+```
+
+
+ Resources Limit
+
+ Daemonsets
+
+ kubectl describe daemonset kube-proxy --namespace=kube-system
+
+ kubectl create deployment elasticsearch --image=k8s.gcr.io/fluentd-elasticsearch:1.20 -n kube-system --dry-run=client -o yaml > fluentd.yaml
+
+ ```
+ apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: elasticsearch
+  name: elasticsearch
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - image: k8s.gcr.io/fluentd-elasticsearch:1.20
+        name: fluentd-elasticsearch
+```
+
+Static PODS
+
+kubectl get pods --all-namespaces (the pod from the list that does not end with -controlplane)
+
+- kube-proxy
+- coredns
+- kube-flannel
+
+
+Create a pod definition file called static-busybox.yaml with the provided specs and place it under /etc/kubernetes/manifests directory
+
+kubectl run --restart=Never --image=busybox static-busybox --dry-run=client -o yaml --command -- sleep 1000 > /etc/kubernetes/manifests/static-busybox.yaml
