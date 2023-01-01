@@ -946,3 +946,23 @@ spec:
     image: <your-private-image>
   imagePullSecrets:
   - name: regcred
+
+
+SECURITY CONTEXT
+
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ubuntu-sleeper
+  namespace: default
+spec:
+  securityContext:
+    runAsUser: 1010
+  containers:
+  - command:
+    - sleep
+    - "4800"
+    image: ubuntu
+    name: ubuntu-sleeper
+```
