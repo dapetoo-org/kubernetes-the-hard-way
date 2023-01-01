@@ -923,3 +923,26 @@ kubectl get serviceaccounts
 kubectl describe serviceaccount  <sva-name>
 
 kubectl get po -o yaml
+
+kubectl create serviceaccount dashboard-sa
+
+kubectl create token dashboard-sa
+
+kubectl set serviceaccount deploy/web-dashboard dashboard-sa
+
+
+SECRETS
+
+kubectl create secret docker-registry private-reg-cred --docker-username=dock_user --docker-password=dock_password --docker-server=myprivateregistry.com:5000 --docker-email=dock_user@myprivateregistry.com
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: private-reg
+spec:
+  containers:
+  - name: private-reg-container
+    image: <your-private-image>
+  imagePullSecrets:
+  - name: regcred
